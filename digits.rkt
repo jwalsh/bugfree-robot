@@ -2,9 +2,7 @@
 
 #lang racket
 
-(require slideshow/pict racket/draw)
-(require (planet neil/csv:2:0) net/url)
-(require json)
+(require (planet neil/csv:2:0) json net/url racket/draw slideshow/pict)
 
 ;; This is the loading style for URL data but isn't immediately used
 ;; in this example 
@@ -67,10 +65,11 @@
 ;; 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 ;; 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 
+;; This is a mock example
+(define digit-pixels '(0 0 0 0 0 0 0 0 0 0 0 0 0 151 254 189 254 231 58 0 0 0 0 0 0 0 0 0))
 
-(define digit-pixels)
 (quote
- (write-json (list (next-row)))
+ (write-json (list digit-pixels))
  )
 
 (circle 10)
@@ -99,7 +98,7 @@
     (vc-append p12 p21)))
 
 (checker (colorize (square 10) "red")
-         (colorize (square 10) "black"))
+         (colorize (square 10) "white"))
 
 (define (checkerboard p)
   (let* ([rp (colorize (square p) "red")]
