@@ -2,7 +2,12 @@
 
 #lang racket
 
-(require (planet neil/csv:2:0) json net/url racket/draw slideshow/pict)
+(require (planet neil/csv:2:0)
+         json
+         net/url
+         racket/draw
+         racket/gui/base
+         slideshow/pict)
 
 ;; This is the loading style for URL data but isn't immediately used
 ;; in this example 
@@ -20,18 +25,19 @@
 (define next-row
   ((make-csv-reader-maker '()) (open-input-file "data/digitscheck.csv")))
 
-
 ;; The first row of the data set just shows the label for the digit
 ;; and the pixel locations as 0 - 255
-
 (define digits-header
   (next-row))
+
+(next-row)
 
 ;; For the initial data we'll be looking at something like the number
 ;; 8
 (define digit-row
   (next-row))
 
+;; Mock structure for the 
 (define digit-label 8)
 
 ;; Extract the data associated with this number:
@@ -68,6 +74,54 @@
 ;; This is a mock example
 (define digit-pixels '(0 0 0 0 0 0 0 0 0 0 0 0 0 151 254 189 254 231 58 0 0 0 0 0 0 0 0 0))
 
+;; We don't want to have the images actually processed but only the
+;; structure created so we get something eventually like
+(define blue
+     (colorize (rectangle 10 10) "blue"))
+(define ivory
+     (colorize (rectangle 10 10) "ivory"))
+(define gray
+     (colorize (rectangle 10 10) "gray"))
+
+;; This is the type of structure we want to build
+(quote
+ (hc-append gray gray gray gray ivory gray gray gray ivory ivory gray gray)
+ )
+
+(define process-digit-pixel
+  (lambda (dp)
+    (if (empty? dp)
+        '()
+        (let ([val (car dp)]
+              [dark '(colorize (circle 10) "gray")]
+              [light '(colorize (rectangle 10 10) "ivory")])
+          (cons 
+           (if (= val 0)
+               light
+               dark)
+           (process-digit-pixel (cdr dp)))))))
+
+;; Create a UI associated with the image
+(process-digit-pixel '(0 0 0 0 0 0 0 0 0 0 0 0 5 159 254 115 102 239 240 91 39 83 46 0 0 0 0 0))
+(process-digit-pixel (cdr (next-row)))
+
+;; (char->integer "3")
+
+;; We have similar problems when looking at seqs vs. formal parameters
+;; with hc-append and string-append
+(string-append "asdf" "asdf")
+
+(list-ref (list "hop" "skip" "jump") 0)
+
+;; Confirm map operates in a manner similar to Clojure 
+(map (lambda (n)
+       (* n n))
+     '(1 2 3 4 5))
+
+
+
+;; Contrast the bracket style of Racket with (if) syntax
+(sort '())
 (quote
  (write-json (list digit-pixels))
  )
@@ -92,13 +146,27 @@
 
 (four (circle 10))
 
+;; Provide a base pixel 
+(define process-line
+  (lambda (p s)
+    (if (empty? s)
+        vc-append
+        (process-line p (cdr s)))))
+
+;; This doesn't pull off the arity that would be expected for a
+;; function definition 
+(define pixel-row
+  (process-line (colorize (square 10) "ivory") '(2 3)))
+
+(pixel-row (colorize (square 10) "ivory"))
+
 (define (checker p1 p2)
   (let ([p12 (hc-append p1 p2)]
         [p21 (hc-append p2 p1)])
     (vc-append p12 p21)))
 
-(checker (colorize (square 10) "red")
-         (colorize (square 10) "white"))
+(checker (colorize (square 10) "ivory")
+         (colorize (square 10) "gray"))
 
 (define (checkerboard p)
   (let* ([rp (colorize (square p) "red")]
